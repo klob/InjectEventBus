@@ -25,7 +25,7 @@ android 事件总线
 2.注解 事件
     
     @Receiver(threadMode = ThreadMode.PostThread)
-    public void myEvent(TestEvent event) {
+    void myEvent(TestEvent event) {
         Toast.makeText(this, event.getMsg() + "", Toast.LENGTH_SHORT).show();
     }
 3.定义 事件
@@ -45,10 +45,6 @@ android 事件总线
 5.反注册
    
     EventBus.getDefault().unregister(this);
-
-##更多
-
-请看 EventBus(https://github.com/greenrobot/EventBus)和InjectEventBus(http://klob.diandi.life/?p=223)
 
 
 ***
