@@ -33,6 +33,16 @@ public class Subscription {
     }
 
     @Override
+    public String toString() {
+        return "Subscription{" +
+                "subscriber=" + subscriber +
+                ", subscriberMethod=" + subscriberMethod +
+                ", priority=" + priority +
+                ", isActive=" + isActive +
+                '}';
+    }
+
+    @Override
     public int hashCode() {
         return subscriber.hashCode();
     }

@@ -17,10 +17,13 @@ import java.util.concurrent.Executors;
 public class EventBusBuilder {
     private final static ExecutorService sExecutorService = Executors.newCachedThreadPool();
 
+
     boolean sendNoSubscriberEvent = true;
     boolean sendSubscriberEvent = true;
 
     boolean throwSubscriberException = false;
+
+    boolean needInnerClassEvent=true;
 
     boolean eventInheritance = true;
 
@@ -59,6 +62,11 @@ public class EventBusBuilder {
             mSkipMethodVerificationForClasses=new ArrayList<>();
         }
         mSkipMethodVerificationForClasses = skipMethodVerificationForClasses;
+        return this;
+    }
+
+    public EventBusBuilder setNeedInnerClassEvent(boolean needInnerClassEvent) {
+        this.needInnerClassEvent = needInnerClassEvent;
         return this;
     }
 

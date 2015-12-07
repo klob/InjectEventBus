@@ -54,6 +54,7 @@ public class EventBus {
     private final boolean mEventInheritance;
     private final boolean mThrowSubscriberException;
     private final boolean mSendSubscriberExceptionEvent;
+    private final boolean mNeedInterClassEvent;
 
     private final HandlerPoster mMainThreadPoster;
     private final BackgroundPoster mBackgroundPoster;
@@ -68,7 +69,7 @@ public class EventBus {
         mSubscriptionByType = new HashMap<>();
         mTypesBySubscriber = new HashMap<>();
 
-
+        mNeedInterClassEvent = builder.needInnerClassEvent;
         mExecutorService = builder.executorService;
         mEventInheritance = builder.eventInheritance;
         mSendNoSubscriberEvent = builder.sendNoSubscriberEvent;
@@ -129,7 +130,7 @@ public class EventBus {
             subscriptions = new CopyOnWriteArrayList<>();
             mSubscriptionByType.put(eventType, subscriptions);
         } else {
-            if (mSubscriptionByType.containsKey(eventType)) {
+            if (subscriptions.contains(newSubscription)) {
                 throw new EventBusException("Subscriber " + subscriber.getClass() + " already registered to the event " + eventType);
             }
         }
@@ -152,9 +153,10 @@ public class EventBus {
     }
 
     public void post(Event event) {
-        if (event == null) {
-            throw new NullPointerException("The event is null");
+        if (!checkEventLegal(event)) {
+            return;
         }
+
         PostingThreadState postingState = mCurrentPostingThreadState.get();
         List<Object> eventQueue = postingState.eventQueue;
         eventQueue.add(event);
@@ -198,17 +200,29 @@ public class EventBus {
         }
     }
 
+    private boolean checkEventLegal(Event event) {
+        if (event == null) {
+            throw new NullPointerException("The event is null");
+        }
+        if (mNeedInterClassEvent) {
+            if (!event.getClass().getName().contains("$")) {
+                throw new IllegalStateException("The event class be a inner class");
+            }
+        }
+        return true;
+
+    }
+
     public synchronized void unregister(Object subscriber) {
         List<Class<?>> subscriberTypes = mTypesBySubscriber.get(subscriber);
-        {
-            if (subscriberTypes != null) {
-                for (Class<?> eventType : subscriberTypes) {
-                    unsubscribeByEventType(subscriber, eventType);
-                }
-                mTypesBySubscriber.remove(subscriber);
-            } else {
-                EventBusDebuger.w(TAG, "Subscriber to unregister was not registered before : " + subscriber.getClass());
+        if (subscriberTypes != null) {
+            for (Class<?> eventType : subscriberTypes) {
+                unsubscribeByEventType(subscriber, eventType);
+
             }
+            mTypesBySubscriber.remove(subscriber);
+        } else {
+            EventBusDebuger.w(TAG, "Subscriber to unregister was not registered before : " + subscriber.getClass());
         }
     }
 
@@ -218,6 +232,7 @@ public class EventBus {
             int size = subscriptions.size();
             for (int i = 0; i < size; i++) {
                 Subscription subscription = subscriptions.get(i);
+                EventBusDebuger.d(TAG, subscription.toString());
                 if (subscription.subscriber == subscriber) {
                     subscription.isActive = false;
                     subscriptions.remove(i);
