@@ -14,7 +14,7 @@ android 事件总线
 ##如何集成到项目
 直接从maven center compile
 
-     compile 'com.diandi.klob:injecteventbus:1.0.0'
+     compile 'com.diandi.klob:injecteventbus:1.0.1'
 
 ##如何使用
 
