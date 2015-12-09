@@ -6,25 +6,21 @@ android 事件总线
 
 ##版本迭代
 ###1.0.0 beta
-
 * 用注解重写EventBus(https://github.com/greenrobot/EventBus)
-
 ###1.0.1 
 
-#发现严重不适配问题
+#发现5.0严重不适配问题
 
 项目暂停
 
-###1.0.2 
 
-问题解决
 
 
 
 ##如何集成到项目
 直接从maven center compile
 
-  compile 'com.diandi.klob:injecteventbus:1.0.2'
+  compile 'com.diandi.klob:injecteventbus:1.0.1'
 
 ##如何使用
 

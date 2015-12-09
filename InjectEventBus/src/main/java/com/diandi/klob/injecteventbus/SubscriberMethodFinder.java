@@ -46,39 +46,41 @@ public class SubscriberMethodFinder {
         if (subscriberMethods != null) {
             return subscriberMethods;
         }
-        subscriberMethods = new ArrayList<>();
+        subscriberMethods = new ArrayList<SubscriberMethod>();
         Class<?> clazz = subscriberClass;
-        HashMap<String, Class> eventTypeFound = new HashMap<>();
+        HashMap<String, Class> eventTypesFound = new HashMap<String, Class>();
         StringBuilder methodKeyBuilder = new StringBuilder();
         while (clazz != null) {
             String name = clazz.getName();
             if (name.startsWith("java.") || name.startsWith("javax.") || name.startsWith("android.")) {
+                // Skip system classes, this just degrades performance
                 break;
             }
+
+            // Starting with EventBus 2.2 we enforced methods to be public (might change with annotations again)
             try {
+                // This is faster than getMethods, especially when subscribers a fat classes like Activities
                 Method[] methods = clazz.getDeclaredMethods();
-                filterSubscriberMethods(subscriberMethods, eventTypeFound, methodKeyBuilder, methods);
-            } catch (Exception e) {
-                e.printStackTrace();
-
-                Method[] methods = clazz.getMethods();
+                filterSubscriberMethods(subscriberMethods, eventTypesFound, methodKeyBuilder, methods);
+            } catch (Throwable th) {
+                // Workaround for java.lang.NoClassDefFoundError, see https://github.com/greenrobot/EventBus/issues/149
+                Method[] methods = subscriberClass.getMethods();
                 subscriberMethods.clear();
-                eventTypeFound.clear();
-                filterSubscriberMethods(subscriberMethods, eventTypeFound, methodKeyBuilder, methods);
+                eventTypesFound.clear();
+                filterSubscriberMethods(subscriberMethods, eventTypesFound, methodKeyBuilder, methods);
                 break;
-
             }
             clazz = clazz.getSuperclass();
         }
         if (subscriberMethods.isEmpty()) {
-            throw new EventBusException("Subscriber " + subscriberClass + " has no public methods Event annotation ");
+            throw new EventBusException("Subscriber " + subscriberClass + " has no public methods called "
+            );
         } else {
             synchronized (mMethodCache) {
                 mMethodCache.put(subscriberClass, subscriberMethods);
             }
+            return subscriberMethods;
         }
-
-        return subscriberMethods;
     }
 
     private void filterSubscriberMethods(List<SubscriberMethod> subscriberMethods, HashMap<String, Class> eventTypesFound, StringBuilder methodKeyBuilder, Method[] methods) {
