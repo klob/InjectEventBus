@@ -58,7 +58,11 @@ android 事件总线
 
 ##更多
 
-请看 EventBus(https://github.com/greenrobot/EventBus)和InjectEventBus(http://klob.diandi.life/?p=223)
+请看      
+     
+             EventBus(https://github.com/greenrobot/EventBus)
+
+             InjectEventBus(http://klob.diandi.life/?p=223)
 
 
 ***
